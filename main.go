@@ -16,9 +16,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	s := aggregateData(r, w)
 	fmt.Fprint(w, s.MinPrice+s.MaxPrice)
 	cmd := exec.Command("docker", "run", "hello-world")
-	if err := cmd.Run(); err != nil {
+	out, err := cmd.Output()
+	if err != nil {
 		fmt.Fprint(w, "an error has occurred")
 	}
+	fmt.Fprint(w, string(out[:]))
 }
 
 func main() {
