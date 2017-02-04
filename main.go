@@ -15,7 +15,7 @@ type DataStruct struct {
 func handler(w http.ResponseWriter, r *http.Request) {
 	s := aggregateData(r, w)
 	fmt.Fprint(w, s.MinPrice+s.MaxPrice)
-	cmd := exec.Command("/bin/sh", "dockerize")
+	cmd := exec.Command("docker", "run", "hello-world")
 	if err := cmd.Run(); err != nil {
 		fmt.Fprint(w, "an error has occurred")
 	}
