@@ -10,13 +10,19 @@ import (
 type DataStruct struct {
 	MinPrice int
 	MaxPrice int
+	SlackToken string
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("receiving at server...")
+	fmt.Fprint(w, "receiving a request...")
 	s := aggregateData(r, w)
 	fmt.Fprint(w, s.MinPrice+s.MaxPrice)
-	cmd := exec.Command("docker", "run", "hello-world")
-	out, err := cmd.Output()
+	// cmd := exec.Command("docker", "run", "hello-world")
+	slackToken := "SLACK_TOKEN="+ s.SlackToken
+	cmd := "docker"
+	cmdArgs := []string{"run", "-d", "-e", slackToken, "personal-bot"}
+	out, err := exec.Command(cmd, cmdArgs...).Output()
 	if err != nil {
 		fmt.Fprint(w, "an error has occurred")
 	}
@@ -37,8 +43,10 @@ func aggregateData(r *http.Request, w http.ResponseWriter) DataStruct {
 	if err != nil {
 		return DataStruct{}
 	}
+	token := r.FormValue("slack_token")
 	return DataStruct{
 		MinPrice: int(min),
 		MaxPrice: int(max),
+		SlackToken: token,
 	}
 }
