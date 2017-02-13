@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+const dockerImage = "personal-bot"
+
 type DataStruct struct {
 	MinPrice int
 	MaxPrice int
@@ -21,7 +23,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// cmd := exec.Command("docker", "run", "hello-world")
 	slackToken := "SLACK_TOKEN="+ s.SlackToken
 	cmd := "docker"
-	cmdArgs := []string{"run", "-d", "-e", slackToken, "personal-bot"}
+	cmdArgs := []string{"run", "-d", "-e", slackToken, dockerImage}
 	out, err := exec.Command(cmd, cmdArgs...).Output()
 	if err != nil {
 		fmt.Fprint(w, "an error has occurred")
