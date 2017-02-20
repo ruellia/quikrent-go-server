@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-const dockerImage = "bathrooms"
+const dockerImage = "filters_work"
 
 type DataStruct struct {
 	MinPrice   string
