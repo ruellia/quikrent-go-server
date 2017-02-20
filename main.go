@@ -1,12 +1,18 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"os/exec"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 const dockerImage = "filters_work"
+
+var db *sql.DB
 
 type DataStruct struct {
 	MinPrice   string
@@ -33,10 +39,37 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "an error has occurred")
 		fmt.Print(err)
 	}
+
+	var test string
+
+	err = db.QueryRow("SELECT slack_token FROM docker WHERE slack_token=?", s.SlackToken).Scan(&test)
+	if err == sql.ErrNoRows {
+		_, err = db.Exec("INSERT INTO docker(slack_token, container_id) VALUES(?, ?)", s.SlackToken, string(out[:]))
+		if err != nil {
+			fmt.Print("ahhh!!!")
+		}
+	} else {
+		fmt.Fprint(w, "a bot is already working on this slack team!")
+	}
+
 	fmt.Fprint(w, string(out[:]))
 }
 
 func main() {
+	//let's try to db stuff
+	var err error
+	db, err = sql.Open("mysql",
+		"root:password@tcp(127.0.0.1:3306)/quikrent")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		fmt.Print("database issues")
+	}
+
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(":8080", nil)
 }
