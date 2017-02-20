@@ -22,15 +22,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	s := aggregateData(r, w)
 	// cmd := exec.Command("docker", "run", "hello-world")
 	slackToken := "SLACK_TOKEN=" + s.SlackToken
-	minPrice := "MIN_PRICE=" + s.MinPrice
-	maxPrice := "MAX_PRICE=" + s.MaxPrice
-	bed := "BEDROOMS=" + s.Bedrooms
-	bath := "BATHROOMS=" + s.Bathrooms
+	minPrice := "-e MIN_PRICE=" + s.MinPrice
+	maxPrice := "-e MAX_PRICE=" + s.MaxPrice
+	bed := "-e BEDROOMS=" + s.Bedrooms
+	bath := "-e BATHROOMS=" + s.Bathrooms
 	cmd := "docker"
 	cmdArgs := []string{"run", "-d", "-e", slackToken, minPrice, maxPrice, bed, bath, dockerImage}
 	out, err := exec.Command(cmd, cmdArgs...).Output()
 	if err != nil {
 		fmt.Fprint(w, "an error has occurred")
+		fmt.Print(err)
 	}
 	fmt.Fprint(w, string(out[:]))
 }
