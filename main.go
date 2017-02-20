@@ -32,18 +32,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	maxPrice := "MAX_PRICE=" + s.MaxPrice
 	bed := "BEDROOMS=" + s.Bedrooms
 	bath := "BATHROOMS=" + s.Bathrooms
-	cmd := "docker"
-	cmdArgs := []string{"run", "-d", "-e", slackToken, "-e", minPrice, "-e", maxPrice, "-e", bed, "-e", bath, dockerImage}
-	out, err := exec.Command(cmd, cmdArgs...).Output()
-	if err != nil {
-		fmt.Fprint(w, "an error has occurred")
-		fmt.Print(err)
-	}
 
 	var test string
 
-	err = db.QueryRow("SELECT slack_token FROM docker WHERE slack_token=?", s.SlackToken).Scan(&test)
+	err := db.QueryRow("SELECT slack_token FROM docker WHERE slack_token=?", s.SlackToken).Scan(&test)
 	if err == sql.ErrNoRows {
+		cmd := "docker"
+		cmdArgs := []string{"run", "-d", "-e", slackToken, "-e", minPrice, "-e", maxPrice, "-e", bed, "-e", bath, dockerImage}
+		out, err := exec.Command(cmd, cmdArgs...).Output()
+		if err != nil {
+			fmt.Fprint(w, "an error has occurred")
+			fmt.Print(err)
+		}
 		_, err = db.Exec("INSERT INTO docker(slack_token, container_id) VALUES(?, ?)", s.SlackToken, string(out[:]))
 		if err != nil {
 			fmt.Print("ahhh!!!")
@@ -52,7 +52,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "a bot is already working on this slack team!")
 	}
 
-	fmt.Fprint(w, string(out[:]))
 }
 
 func main() {
