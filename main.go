@@ -17,12 +17,13 @@ const dockerImage = "filters_work"
 var db *sql.DB
 
 type CraigslistSettings struct {
-	MinPrice      string   `json:"min_price"`
-	MaxPrice      string   `json:"max_price"`
-	SlackToken    string   `json:"slack_token"`
-	Bedrooms      string   `json:"bed"`
-	Bathrooms     string   `json:"bath"`
-	Neighborhoods []string `json:"neighborhoods"`
+	MinPrice        float64                `json:"min_price"`
+	MaxPrice        float64                `json:"max_price"`
+	SlackToken      string                 `json:"slack_token"`
+	Bedrooms        string                 `json:"bed"`
+	Bathrooms       string                 `json:"bath"`
+	Neighborhoods   []string               `json:"neighborhoods"`
+	TransitStations map[string]interface{} `json:"transit_stations"`
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
