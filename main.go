@@ -5,16 +5,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
+	uuid "github.com/satori/go.uuid"
 )
 
 const dockerImage = "filters_work"
 
 var db *sql.DB
 
-type DataStruct struct {
+type CraigslistSettings struct {
 	MinPrice      string   `json:"min_price"`
 	MaxPrice      string   `json:"max_price"`
 	SlackToken    string   `json:"slack_token"`
@@ -53,73 +55,76 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// 	fmt.Fprint(w, "a bot is already working on this slack team!")
 	// }
 
-	decoder := json.NewDecoder(r.Body)
-	var t DataStruct
-	err := decoder.Decode(&t)
-	if err != nil {
-		panic(err)
-	}
+	// IMPORTANT!!!
 	defer r.Body.Close()
-	fmt.Println(t)
-	b, err := json.Marshal(t)
+
+	// settings is request converted to our settings struct
+	settings, err := convertJSONRequest(r)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(b))
-	// generate uuid as json file name?
-	if err := ioutil.WriteFile("example.json", b, 0644); err != nil {
-		panic(err)
+
+	var test string
+	err = db.QueryRow("SELECT slack_token FROM docker WHERE slack_token=?", settings.SlackToken).Scan(&test)
+	if err == sql.ErrNoRows {
+		// marshal the struct into a json byte array?
+		marshaled, err := json.Marshal(settings)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(string(marshaled))
+		// generate uuid as json file name?
+		fileName := uuid.NewV4().String() + ".json" // <- need to also store this in db
+		if err := ioutil.WriteFile(fileName, marshaled, 0644); err != nil {
+			panic(err)
+		}
+		_, err = db.Exec("INSERT INTO docker(slack_token, container_id, json_path) VALUES(?, ?, ?)", settings.SlackToken, "FOR NOW TEST :)", fileName)
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+	} else {
+		fmt.Fprint(w, "a bot is already working on this slack team!")
 	}
 }
 
 func main() {
-	//let's try to db stuff
-	// var err error
-	// db, err = sql.Open("mysql",
-	// 	"root:password@tcp(127.0.0.1:3306)/quikrent")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer db.Close()
+	// let's try to db stuff
+	var err error
+	db, err = sql.Open("mysql",
+		"root:password@tcp(127.0.0.1:3306)/quikrent")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 
-	// err = db.Ping()
-	// if err != nil {
-	// 	fmt.Print("database issues")
-	// }
+	err = db.Ping()
+	if err != nil {
+		fmt.Print("database issues")
+	}
 
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(":8080", nil)
 }
 
-func aggregateData(r *http.Request, w http.ResponseWriter) DataStruct {
-	// min, err := strconv.ParseInt(r.FormValue("min_price"), 10, 64)
-	// if err != nil {
-	// 	return DataStruct{}
-	// }
-	// max, err := strconv.ParseInt(r.FormValue("max_price"), 10, 64)
-	// if err != nil {
-	// 	return DataStruct{}
-	// }
-	// bath, err := strconv.ParseInt(r.FormValue("bathrooms"), 10, 64)
-	// if err != nil {
-	// 	return DataStruct{}
-	// }
-	// bed, err := strconv.ParseInt(r.FormValue("bedrooms"), 10, 64)
-	// if err != nil {
-	// 	return DataStruct{}
-	// }
-	token := r.FormValue("slack_token")
-	min := r.FormValue("min_price")
-	max := r.FormValue("max_price")
-	bath := r.FormValue("bathrooms")
-	bed := r.FormValue("bedrooms")
-
-	return DataStruct{
-		MinPrice:   min,
-		MaxPrice:   max,
-		SlackToken: token,
-		Bedrooms:   bed,
-		Bathrooms:  bath,
+func convertJSONRequest(r *http.Request) (CraigslistSettings, error) {
+	decoder := json.NewDecoder(r.Body)
+	var converted CraigslistSettings
+	if err := decoder.Decode(&converted); err != nil {
+		return CraigslistSettings{}, err
 	}
+	return converted, nil
+}
+
+func writeToJSONFile(settings CraigslistSettings) error {
+	return nil
+	// marshaled, err := json.Marshal(settings)
+	// if err != nil {
+	// 	return err
+	// }
+	// // generate uuid as json file name?
+	// if err := ioutil.WriteFile("example.json", b, 0644); err != nil {
+	// 	panic(err)
+	// }
 }
