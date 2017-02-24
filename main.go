@@ -20,8 +20,8 @@ type CraigslistSettings struct {
 	MinPrice        float64                `json:"min_price"`
 	MaxPrice        float64                `json:"max_price"`
 	SlackToken      string                 `json:"slack_token"`
-	Bedrooms        string                 `json:"bed"`
-	Bathrooms       string                 `json:"bath"`
+	Bedrooms        float64                `json:"bed"`
+	Bathrooms       float64                `json:"bath"`
 	Neighborhoods   []string               `json:"neighborhoods"`
 	TransitStations map[string]interface{} `json:"transit_stations"`
 }

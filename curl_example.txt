@@ -1,14 +1,14 @@
 curl -v -X POST -d '{
     "min_price":300,
     "max_price":500,
-    "bed":"3",
-    "bath":"1",
-    "slack_token":"example1",
+    "bed":3,
+    "bath":1,
+    "slack_token":"xoxp-123456788101-123456788101-123456788101-a1234567bcdef12345g1a12a3abc1b0c",
     "neighborhoods":
         ["berkeley north", "berkeley", "rockridge"],
     "transit_stations": {
         "oakland_19th_bart": [37.8118051,-122.2720873],
-        "blahhhh": [37.8118051,-122.2720873]
+        "macarthur_bart": [37.8265657,-122.2686705]
 	}
 }'
 http://localhost:8080
