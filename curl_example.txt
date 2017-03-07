@@ -3,12 +3,8 @@ curl -v -X POST -d '{
     "max_price":500,
     "bed":3,
     "bath":1,
-    "slack_token":"xoxp-123456788101-123456788101-123456788101-a1234567bcdef12345g1a12a3abc1b0c",
+    "slack_token":"xoxp-139832760016-139832760080-141230786695-779c19d54d6410ed09f73f795d649cf2",
     "neighborhoods":
-        ["berkeley north", "berkeley", "rockridge"],
-    "transit_stations": {
-        "oakland_19th_bart": [37.8118051,-122.2720873],
-        "macarthur_bart": [37.8265657,-122.2686705]
-	}
+        ["berkeley north", "berkeley", "rockridge"]
 }'
-http://localhost:8080
+ec2-52-25-39-194.us-west-2.compute.amazonaws.com:8080
