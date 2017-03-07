@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os/exec"
+	"path/filepath"
 
 	_ "github.com/go-sql-driver/mysql"
 	uuid "github.com/satori/go.uuid"
@@ -24,6 +26,7 @@ type CraigslistSettings struct {
 	Bathrooms       float64                `json:"bath"`
 	Neighborhoods   []string               `json:"neighborhoods"`
 	TransitStations map[string]interface{} `json:"transit_stations"`
+	AbsolutePath    string
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -40,8 +43,21 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	var test string
 	err = db.QueryRow("SELECT slack_token FROM docker WHERE slack_token=?", settings.SlackToken).Scan(&test)
 	if err == sql.ErrNoRows {
-		if err := insertNewRow(settings); err != nil {
+		if err := createJSONFile(&settings); err != nil {
 			fmt.Fprint(w, err.Error())
+			return
+		}
+		cmd := "docker"
+		jsonSettings := "JSON_SETTINGS=" + settings.AbsolutePath
+		cmdArgs := []string{"run", "-d", "-e", jsonSettings, dockerImage}
+		out, err := exec.Command(cmd, cmdArgs...).Output()
+		if err != nil {
+			fmt.Fprint(w, "an error has occurred!!!")
+			fmt.Print(err)
+		}
+		if err := insertNewRow(settings, string(out[:])); err != nil {
+			fmt.Fprint(w, "an error has occurred")
+			fmt.Print(err)
 		}
 	} else {
 		fmt.Fprint(w, "a bot is already working on this slack team!")
@@ -77,7 +93,15 @@ func convertJSONRequest(r *http.Request) (CraigslistSettings, error) {
 }
 
 // not the best name i think since it does more than just insert...rename later?
-func insertNewRow(settings CraigslistSettings) error {
+func insertNewRow(settings CraigslistSettings, containerID string) error {
+	_, err := db.Exec("INSERT INTO docker(slack_token, container_id, json_path) VALUES(?, ?, ?)", settings.SlackToken, containerID, settings.AbsolutePath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func createJSONFile(settings *CraigslistSettings) error {
 	// marshal the struct into a json byte array?
 	marshaled, err := json.Marshal(settings)
 	if err != nil {
@@ -85,11 +109,9 @@ func insertNewRow(settings CraigslistSettings) error {
 	}
 	// generate uuid as json file name?
 	fileName := uuid.NewV4().String() + ".json" // <- need to also store this in db
+	fileName, _ = filepath.Abs("../" + fileName)
+	settings.AbsolutePath = fileName
 	if err := ioutil.WriteFile(fileName, marshaled, 0644); err != nil {
-		panic(err)
-	}
-	_, err = db.Exec("INSERT INTO docker(slack_token, container_id, json_path) VALUES(?, ?, ?)", settings.SlackToken, "FOR NOW TEST :)", fileName)
-	if err != nil {
 		return err
 	}
 	return nil
