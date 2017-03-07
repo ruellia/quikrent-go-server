@@ -14,7 +14,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-const dockerImage = "filters_work"
+const dockerImage = "please_work"
 
 var db *sql.DB
 
@@ -49,7 +49,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 		cmd := "docker"
 		jsonSettings := "JSON_SETTINGS=" + settings.AbsolutePath
-		cmdArgs := []string{"run", "-d", "-e", jsonSettings, dockerImage}
+		cmdArgs := []string{"run", "-d", "-e", jsonSettings, "-v", settings.AbsolutePath+":"+settings.AbsolutePath+":ro", dockerImage}
 		out, err := exec.Command(cmd, cmdArgs...).Output()
 		if err != nil {
 			fmt.Fprint(w, "an error has occurred!!!")
