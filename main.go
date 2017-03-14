@@ -40,6 +40,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	var test string
 	err = db.QueryRow("SELECT slack_token FROM docker WHERE slack_token=?", settings.SlackToken).Scan(&test)
 	if err == sql.ErrNoRows {
@@ -49,18 +50,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 		cmd := "docker"
 		jsonSettings := "JSON_SETTINGS=" + settings.AbsolutePath
-		cmdArgs := []string{"run", "-d", "-e", jsonSettings, "-v", settings.AbsolutePath+":"+settings.AbsolutePath+":ro", dockerImage}
+		cmdArgs := []string{"run", "-d", "-e", jsonSettings, "-v", settings.AbsolutePath + ":" + settings.AbsolutePath + ":ro", dockerImage}
 		out, err := exec.Command(cmd, cmdArgs...).Output()
 		if err != nil {
-			fmt.Fprint(w, "an error has occurred!!!")
-			fmt.Print(err)
+			http.Error(w, "docker error: "+err.Error(), http.StatusInternalServerError)
+			return
 		}
 		if err := insertNewRow(settings, string(out[:])); err != nil {
-			fmt.Fprint(w, "an error has occurred")
-			fmt.Print(err)
+			http.Error(w, "database error: "+err.Error(), http.StatusInternalServerError)
+			return
 		}
+		w.WriteHeader(http.StatusOK)
 	} else {
-		fmt.Fprint(w, "a bot is already working on this slack team!")
+		http.Error(w, "a bot already exists for this slack token", http.StatusForbidden)
 	}
 }
 
