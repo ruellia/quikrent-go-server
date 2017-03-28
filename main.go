@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
+	"strings"
 
 	"github.com/ruellia/quikrent-bash/settings"
 
@@ -89,7 +90,7 @@ func (handler *DeleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "delete failed in database", http.StatusInternalServerError)
 	} else {
 		cmd := "docker"
-		cmdArgs := []string{"rm", "-f", container}
+		cmdArgs := []string{"rm", "-f", strings.TrimSpace(container)}
 		_, err := exec.Command(cmd, cmdArgs...).Output()
 		if err != nil {
 			http.Error(w, "docker error", http.StatusInternalServerError)
