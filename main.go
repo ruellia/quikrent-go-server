@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,6 +18,15 @@ const dockerImage = "please_work"
 // RootHandler is a handler that deals with requests to the root directory.
 type RootHandler struct {
 	db *sql.DB
+}
+
+// DeleteHandler is a handler that deals with requests to /delete.
+type DeleteHandler struct {
+	db *sql.DB
+}
+
+type SimpleDelete struct {
+	SlackToken string `json:"slack_token"`
 }
 
 func (handler *RootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -54,6 +64,41 @@ func (handler *RootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (handler *DeleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	decoder := json.NewDecoder(r.Body)
+	var converted SimpleDelete
+	if err := decoder.Decode(&converted); err != nil {
+		panic(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var container string
+	err := handler.db.QueryRow("SELECT container_id FROM docker WHERE slack_token=?", converted.SlackToken).Scan(&container)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "no such bot exists", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = handler.db.Exec("DELETE FROM docker WHERE slack_token=?", converted.SlackToken)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "delete failed in database", http.StatusInternalServerError)
+	} else {
+		cmd := "docker"
+		cmdArgs := []string{"rm", "-f", container}
+		_, err := exec.Command(cmd, cmdArgs...).Output()
+		if err != nil {
+			http.Error(w, "docker error", http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func main() {
 	db, err := sql.Open("mysql",
 		"root:password@tcp(127.0.0.1:3306)/quikrent")
@@ -70,10 +115,10 @@ func main() {
 	}
 
 	http.Handle("/", &RootHandler{db: db})
+	http.Handle("/delete", &DeleteHandler{db: db})
 	http.ListenAndServe(":8080", nil)
 }
 
-// not the best name i think since it does more than just insert...rename later?
 func insertNewRow(db *sql.DB, settings settings.Settings, containerID string) error {
 	_, err := db.Exec("INSERT INTO docker(slack_token, container_id, json_path) VALUES(?, ?, ?)", settings.BotSettings.SlackToken, containerID, settings.AbsolutePath)
 	if err != nil {
