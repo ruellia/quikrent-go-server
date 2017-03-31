@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/ruellia/quikrent-bash/util"
+	"github.com/ruellia/quikrent-go-server/util"
 
 	uuid "github.com/satori/go.uuid"
 )

@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/ruellia/quikrent-bash/handlers"
+	"github.com/ruellia/quikrent-go-server/handlers"
 
 	_ "github.com/go-sql-driver/mysql"
 )

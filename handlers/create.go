@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os/exec"
 
-	"github.com/ruellia/quikrent-bash/settings"
+	"github.com/ruellia/quikrent-go-server/settings"
 )
 
 const dockerImage = "forked"
