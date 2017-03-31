@@ -9,7 +9,7 @@ import (
 	"github.com/ruellia/quikrent-bash/settings"
 )
 
-const dockerImage = "please_work"
+const dockerImage = "forked"
 
 // CreateHandler is a handler that deals with creation of new slack bots.
 type CreateHandler struct {
