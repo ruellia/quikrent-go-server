@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/ruellia/quikrent-bash/handlers"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
