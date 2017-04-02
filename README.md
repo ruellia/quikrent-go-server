@@ -23,13 +23,13 @@ curl -v -X POST -d '{
 Update an existing bot:
 ```
 curl -v -X POST -d '{
-    "min_price":1000,
-    "max_price":3000,
-    "bed":3,
+    "min_price":100,
+    "max_price":5000,
+    "bed":1,
     "bath":1,
     "slack_token":"example_slack_token",
     "neighborhoods":
         ["berkeley north", "berkeley", "rockridge"]
 }'
-34.208.42.84:8080/create
+34.208.42.84:8080/update
 ```
