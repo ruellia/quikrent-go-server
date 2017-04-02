@@ -34,6 +34,7 @@ func (handler *UpdateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 	if err := settings.UpdateJSONFile(s); err != nil {
 		http.Error(w, "i/o error: "+err.Error(), http.StatusInternalServerError)
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 }
