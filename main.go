@@ -26,6 +26,7 @@ func main() {
 	}
 
 	http.Handle("/create", &handlers.CreateHandler{DB: db})
+	http.Handle("/update", &handlers.DeleteHandler{DB: db})
 	http.Handle("/delete", &handlers.DeleteHandler{DB: db})
 	http.ListenAndServe(":8080", nil)
 }

@@ -46,6 +46,18 @@ func CreateJSONFile(settings *Settings) error {
 	return nil
 }
 
+// UpdateJSONFile updates a JSON file based on the BotSettings struct.
+func UpdateJSONFile(settings Settings) error {
+	marshaled, err := json.Marshal(settings.BotSettings)
+	if err != nil {
+		return err
+	}
+	if err := ioutil.WriteFile(settings.AbsolutePath, marshaled, 0644); err != nil {
+		return err
+	}
+	return nil
+}
+
 // ConvertJSONRequest converts a JSON HTTP request into our Settings struct.
 func ConvertJSONRequest(r *http.Request) (Settings, error) {
 	decoder := json.NewDecoder(r.Body)
