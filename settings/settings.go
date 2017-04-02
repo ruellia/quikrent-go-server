@@ -40,7 +40,7 @@ func CreateJSONFile(settings *Settings) error {
 		return err
 	}
 	settings.AbsolutePath = fileName
-	if err := ioutil.WriteFile(fileName, marshaled, 0644); err != nil {
+	if err := ioutil.WriteFile(fileName, marshaled, 0777); err != nil {
 		return err
 	}
 	return nil
@@ -52,7 +52,7 @@ func UpdateJSONFile(settings Settings) error {
 	if err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(settings.AbsolutePath, marshaled, 0644); err != nil {
+	if err := ioutil.WriteFile(settings.AbsolutePath, marshaled, 0777); err != nil {
 		return err
 	}
 	return nil

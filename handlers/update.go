@@ -23,8 +23,8 @@ func (handler *UpdateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	var test string
-	err = handler.DB.QueryRow("SELECT slack_token FROM docker WHERE slack_token=?", s.BotSettings.SlackToken).Scan(&test)
+	var path string
+	err = handler.DB.QueryRow("SELECT json_path FROM docker WHERE slack_token=?", s.BotSettings.SlackToken).Scan(&path)
 	if err == sql.ErrNoRows {
 		http.Error(w, "a bot doesn't exist yet for this team", http.StatusNotFound)
 		return
@@ -32,6 +32,7 @@ func (handler *UpdateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "database error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	s.AbsolutePath = path
 	if err := settings.UpdateJSONFile(s); err != nil {
 		http.Error(w, "i/o error: "+err.Error(), http.StatusInternalServerError)
 		return
