@@ -19,13 +19,17 @@ type Settings struct {
 
 // BotSettings are the settings that will be passed into the Slackbot.
 type BotSettings struct {
-	MinPrice        float64                `json:"min_price"`
-	MaxPrice        float64                `json:"max_price"`
-	SlackToken      string                 `json:"slack_token"`
-	Bedrooms        float64                `json:"bed"`
-	Bathrooms       float64                `json:"bath"`
-	Neighborhoods   []string               `json:"neighborhoods"`
-	TransitStations map[string]interface{} `json:"transit_stations"`
+	MinPrice                 float64                `json:"min_price"`
+	MaxPrice                 float64                `json:"max_price"`
+	SlackToken               string                 `json:"slack_token"`
+	Bedrooms                 float64                `json:"bed"`
+	Bathrooms                float64                `json:"bath"`
+	CraigslistSite           string                 `json:"craigslist_site"`
+	CraigslistHousingSection string                 `json:"craigslist_housing_section"`
+	Areas                    []string               `json:"areas"`
+	MaxTransitDistance       float64                `json:"max_transit_distance"`
+	Neighborhoods            []string               `json:"neighborhoods"`
+	TransitStations          map[string]interface{} `json:"transit_stations"`
 }
 
 // CreateJSONFile creates a JSON file based on the BotSettings struct.
