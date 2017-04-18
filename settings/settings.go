@@ -29,7 +29,8 @@ type BotSettings struct {
 	Areas                    []string               `json:"areas"`
 	MaxTransitDistance       float64                `json:"max_transit_distance"`
 	Neighborhoods            []string               `json:"neighborhoods"`
-	TransitStations          map[string]interface{} `json:"transit_stations"`
+	TransitStations          map[string][]float64   `json:"transit_stations"`
+	Boxes                    map[string][][]float64 `json:"boxes"`
 }
 
 // CreateJSONFile creates a JSON file based on the BotSettings struct.
