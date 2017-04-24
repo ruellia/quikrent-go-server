@@ -29,11 +29,25 @@ func (handler *DeleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 
-	var container string
+	var container, jsonFile string
 	err := handler.DB.QueryRow("SELECT container_id FROM docker WHERE slack_token=?", converted.SlackToken).Scan(&container)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "no such bot exists", http.StatusInternalServerError)
+		return
+	}
+
+	handler.DB.QueryRow("SELECT container_id FROM docker WHERE slack_token=?", converted.SlackToken).Scan(&jsonFile)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "no such bot exists", http.StatusInternalServerError)
+		return
+	}
+	cmd := "rm"
+	cmdArgs := []string{strings.TrimSpace(jsonFile)}
+	_, err = exec.Command(cmd, cmdArgs...).Output()
+	if err != nil {
+		http.Error(w, "deletion error", http.StatusInternalServerError)
 		return
 	}
 
