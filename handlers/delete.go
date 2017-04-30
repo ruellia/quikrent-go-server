@@ -37,7 +37,7 @@ func (handler *DeleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	handler.DB.QueryRow("SELECT container_id FROM docker WHERE slack_token=?", converted.SlackToken).Scan(&jsonFile)
+	handler.DB.QueryRow("SELECT json_path FROM docker WHERE slack_token=?", converted.SlackToken).Scan(&jsonFile)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "no such bot exists", http.StatusInternalServerError)
