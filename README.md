@@ -46,7 +46,7 @@ curl -v -X POST -d '{
 		]
 	}
 }'
-34.208.42.84:8080/create
+34.210.105.162:8080/create
 ```
 
 Delete an existing bot:
@@ -54,7 +54,7 @@ Delete an existing bot:
 curl -v -X POST -d '{
     "slack_token":"example_slack_token"
 }'
-34.208.42.84:8080/delete
+34.210.105.162:8080/delete
 ```
 
 Update an existing bot:
@@ -105,6 +105,6 @@ curl -v -X POST -d '{
 		]
 	}
 }'
-34.208.42.84:8080/update
+34.210.105.162:8080/update
 ```
 Current implementation requires that you pass all data to update, this will eventually not be necessary (you will only need to pass data you're updating).
