@@ -33,7 +33,7 @@ func (handler *DeleteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	err := handler.DB.QueryRow("SELECT container_id FROM docker WHERE slack_token=?", converted.SlackToken).Scan(&container)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "no such bot exists", http.StatusInternalServerError)
+		http.Error(w, "no such bot exists", http.StatusNotFound)
 		return
 	}
 
