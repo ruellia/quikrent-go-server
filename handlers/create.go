@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"os/exec"
 
@@ -19,18 +18,18 @@ type CreateHandler struct {
 func (handler *CreateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
+	w.Header().Set("Content-Type", "application/json")
 	s, err := settings.ConvertJSONRequest(r)
 	if err != nil {
-		fmt.Println(err)
+		http.Error(w, "incorrectly formatted json request: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	var test string
 	err = handler.DB.QueryRow("SELECT slack_token FROM docker WHERE slack_token=?", s.BotSettings.SlackToken).Scan(&test)
 	if err == sql.ErrNoRows {
 		if err := settings.CreateJSONFile(&s); err != nil {
-			fmt.Fprint(w, err.Error())
+			http.Error(w, "error creating settings file: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		cmd := "docker"
